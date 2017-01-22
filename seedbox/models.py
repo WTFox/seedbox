@@ -1,4 +1,3 @@
-import codecs
 import os
 import pickle
 
@@ -21,8 +20,7 @@ class SeedBox():
                 exit()
 
         with open(self.config_file, 'rb') as f:
-            _creds = pickle.load(f)
-            _creds = codecs.decode(_creds, 'base64').split(';;')
+            _creds = pickle.load(f).split(';;')
             self.hostname = _creds[0]
             self.port = int(_creds[1])
             self.username = _creds[2]
@@ -53,7 +51,7 @@ class SeedBox():
         _creds = "{};;{};;{};;{}".format(hostname, port, username, password)
 
         with open(self.config_file, 'wb') as f:
-            pickle.dump(codecs.encode(_creds, 'base64'), f, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(_creds, f, pickle.HIGHEST_PROTOCOL)
 
         return
 
