@@ -11,6 +11,9 @@ class SeedBox():
         self.port = int(os.environ.get('SBOX_PORT', None))
         self.username = os.environ.get('SBOX_USERNAME', None)
         self.password = os.environ.get('SBOX_PASSWORD', None)
+        if not all([self.hostname, self.port, self.username, self.password]):
+            raise ValueError("Please provide all login information.")
+
         self.conn = None
         self.transport = None
 

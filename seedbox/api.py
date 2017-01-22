@@ -5,25 +5,41 @@ import click
 from .models import SeedBox
 from .utils import convert_time, is_dir
 
+PAGER_LIMIT = 12
 
-def _latest_files(dir, count):
+
+def _latest_files(dir, count=10, all_files=False):
     """Simple function that lists the latest items from <dir>"""
+    output = []
     with SeedBox() as s:
-        _dir = os.path.join('downloads', dir)
         try:
-            s.chdir(_dir)
+            s.chdir(os.path.join('downloads', dir))
+            files = sorted(s.listdir_attr(), key=lambda x:x.st_mtime, reverse=True)
         except:
             click.secho("Invalid directory.", fg="red")
             return
 
-        click.echo(click.style("Getting latest files...", fg='green'))
-        files = sorted(s.listdir_attr(), key=lambda x:x.st_mtime, reverse=True)
-        for file in files[:count]:
-            msg = "{}\t{}".format(convert_time(file.st_mtime), file.filename)
-            if is_dir(file):
-                click.secho(msg, fg='blue')
-            else:
-                click.secho(msg, fg='white')
+    for file in files:
+        filename = file.filename.encode('ascii', errors='replace')
+        msg = "{}  {}".format(
+            convert_time(file.st_mtime),
+            click.format_filename(filename)
+        )
+        if is_dir(file):
+            output.append(click.style(msg, fg='blue'))
+        else:
+            output.append(click.style(msg, fg='white'))
+
+        if not all_files:
+            output = output[:count]
+
+    if len(output) <= PAGER_LIMIT:
+        echo_func = click.echo
+    else:
+        echo_func = click.echo_via_pager
+
+    output = '\n'.join(output)
+    echo_func(output)
     return
 
 
@@ -33,25 +49,28 @@ def cli():
 
 
 @cli.command()
-@click.option('--count', default=10, help='number of files in movies to display')
-def latest_movies(count):
+@click.option('--count', '-c', default=10, help='Number of files in movies to display.')
+@click.option('--all-files', '-a', is_flag=True, help='Display all files.')
+def movies(count, all_files):
     """lists the latest movies from the SeedBox."""
-    _latest_files('movies', count)
+    _latest_files('movies', count, all_files)
 
 
 @cli.command()
-@click.option('--count', default=10, help='number of files in tvshows to display')
-def latest_tv(count):
+@click.option('--count', '-c', default=10, help='Number of files in tvshows to display.')
+@click.option('--all-files', '-a', is_flag=True, help='Display all files.')
+def tv(count, all_files):
     """lists the latest tvshows from the SeedBox."""
-    _latest_files('tvshows', count)
+    _latest_files('tvshows', count, all_files)
 
 
 @cli.command()
-@click.option('--dir', default='', help='directory to list files in. default: downloads/')
-@click.option('--count', default=10, help='number of files in <dir> to display')
-def latest_files(dir, count):
-    """lists the latest files from <dir>."""
-    _latest_files(dir, count)
+@click.option('--dir', '-d', default='', help='directory to list files in. default: downloads/')
+@click.option('--count', '-c', default=10, help='number of files in <dir> to display')
+@click.option('--all-files', '-a', is_flag=True, help='Display all files.')
+def ls(dir, count, all_files):
+    """lists the latest files from /downloads/<dir>."""
+    _latest_files(dir, count, all_files)
 
 
 if __name__ == '__main__':
