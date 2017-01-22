@@ -1,3 +1,4 @@
+import bz2
 import os
 import pickle
 
@@ -20,11 +21,13 @@ class SeedBox():
                 exit()
 
         with open(self.config_file, 'rb') as f:
-            self.creds = pickle.load(f)
-            self.hostname = self.creds['hostname']
-            self.port = int(self.creds['port'])
-            self.username = self.creds['username']
-            self.password = self.creds['password']
+            _creds = pickle.load(f)
+            _creds = bz2.decompress(_creds)
+            _creds = _creds.split(';;')
+            self.hostname = _creds[0]
+            self.port = int(_creds[1])
+            self.username = _creds[2]
+            self.password = _creds[3]
 
         if not all([self.hostname, self.port, self.username, self.password]):
             yes = click.confirm("You do not have information credentials stored. Would you like to enter them now?")
@@ -44,22 +47,16 @@ class SeedBox():
         return True
 
     def _add_auth_credentials(self):
-        _creds = {}
-        _creds['hostname'] = click.prompt('Enter the hostname')
-        _creds['port'] = click.prompt('Enter the port', type=int)
-        _creds['username'] = click.prompt('Enter the username')
-        _creds['password'] = click.prompt('Enter the password (input is hidden)', hide_input=True)
+        hostname = click.prompt('Enter the hostname')
+        port = click.prompt('Enter the port', type=int)
+        username = click.prompt('Enter the username')
+        password = click.prompt('Enter the password (input is hidden)', hide_input=True)
+        _creds = "{};;{};;{};;{}".format(hostname, port, username, password)
 
         with open(self.config_file, 'wb') as f:
-            pickle.dump(_creds, f, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(bz2.compress(_creds), f, pickle.HIGHEST_PROTOCOL)
 
         return
-
-    def __enter__(self):
-        return self._login()
-
-    def __exit__(self, *args):
-        self._logout()
 
     def _login(self):
         self.transport = paramiko.Transport((self.hostname, self.port))
@@ -70,3 +67,16 @@ class SeedBox():
     def _logout(self):
         self.conn.close()
         self.transport.close()
+
+    def __enter__(self):
+        return self._login()
+
+    def __exit__(self, *args):
+        self._logout()
+
+    def __enter__(self):
+        return self._login()
+
+    def __exit__(self, *args):
+        self._logout()
+
