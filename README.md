@@ -1,19 +1,6 @@
 
 # seedbox
 
-## Setup
-
-Add the following lines to your bashrc/zshrc/etc
-
-```
-# Seedbox
-export SBOX_HOSTNAME="<IP or URL HERE>"
-export SBOX_PORT=22
-export SBOX_USERNAME="<USERNAME_HERE>"
-export SBOX_PASSWORD="<PASSWORD_HERE>"
-
-```
-
 ## Installation
 
 Just download or clone this project, `cd` into the dir then run
@@ -33,6 +20,7 @@ or
 ```
 
 ## Usage
+Note: When running it the first time it will ask you to enter login credentials.
 ``` bash
     ➜  ~ seedbox --help
     Usage: seedbox [OPTIONS] COMMAND [ARGS]...
