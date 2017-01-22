@@ -7,7 +7,7 @@ from .utils import convert_time, is_dir
 
 
 def _latest_files(dir, count):
-    """Simple function that retrieves the latest items from <dir>"""
+    """Simple function that lists the latest items from <dir>"""
     with SeedBox() as s:
         _dir = os.path.join('downloads', dir)
         try:
@@ -35,14 +35,14 @@ def cli():
 @cli.command()
 @click.option('--count', default=10, help='number of files in movies to display')
 def latest_movies(count):
-    """Retrieves the latest movies from the SeedBox."""
+    """lists the latest movies from the SeedBox."""
     _latest_files('movies', count)
 
 
 @cli.command()
 @click.option('--count', default=10, help='number of files in tvshows to display')
 def latest_tv(count):
-    """Retrieves the latest tvshows from the SeedBox."""
+    """lists the latest tvshows from the SeedBox."""
     _latest_files('tvshows', count)
 
 
@@ -50,7 +50,7 @@ def latest_tv(count):
 @click.option('--dir', default='', help='directory to list files in. default: downloads/')
 @click.option('--count', default=10, help='number of files in <dir> to display')
 def latest_files(dir, count):
-    """Retrieves the latest files from <dir>."""
+    """lists the latest files from <dir>."""
     _latest_files(dir, count)
 
 
