@@ -73,10 +73,3 @@ class SeedBox():
 
     def __exit__(self, *args):
         self._logout()
-
-    def __enter__(self):
-        return self._login()
-
-    def __exit__(self, *args):
-        self._logout()
-
