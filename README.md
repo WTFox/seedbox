@@ -33,8 +33,18 @@ or
 ```
 
 ## Usage
-![Usages](/usage.png)
+``` bash
+    ➜  ~ seedbox --help
+    Usage: seedbox [OPTIONS] COMMAND [ARGS]...
 
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      ls      lists the latest files from /downloads/<dir>.
+      movies  lists the latest movies from the SeedBox.
+      tv      lists the latest tvshows from the SeedBox.
+```
 
 ## Contributing
 
