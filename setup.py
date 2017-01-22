@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='seedbox',
-    version='0.3',
+    version='0.4',
     packages=['seedbox'],
     url='',
     license='MIT',
@@ -13,6 +13,7 @@ setup(
     install_requires=[
         'Click',
         'paramiko',
+        'colorama',
     ],
     entry_points='''
         [console_scripts]
