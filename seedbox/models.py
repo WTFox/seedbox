@@ -53,7 +53,7 @@ class SeedBox():
         _creds = "{};;{};;{};;{}".format(hostname, port, username, password)
 
         with open(self.config_file, 'wb') as f:
-            encrypted_creds = base64.b64encode(bytes(_creds, encoding='utf8'))
+            encrypted_creds = base64.b64encode(_creds.encode())
             pickle.dump(encrypted_creds, f, pickle.HIGHEST_PROTOCOL)
 
         return
