@@ -53,8 +53,8 @@ def _latest_files(dir, count=10, all_files=False):
 
 def _download(remote_dir, local_dir, is_directory=False):
     with SeedBox() as sftp:
-        if is_directory:
-            sftp.get(rpath, lpath)
+        if not is_directory:
+            sftp.get(remote_dir, local_dir)
         else:
             os.path.exists(local_dir) or os.makedirs(local_dir)
             dir_items = sftp.listdir_attr(remote_dir)
@@ -99,6 +99,7 @@ def ls(dir, count, all_files):
     _latest_files(dir, count, all_files)
 
 
+@cli.command()
 @click.argument('file_id')
 def get(file_id):
     folder, idx = file_id.split('_')
