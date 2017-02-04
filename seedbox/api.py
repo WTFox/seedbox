@@ -11,9 +11,7 @@ PAGER_LIMIT = 12
 q = Queue(connection=conn)
 
 
-def _latest_files(dir, count=10, all_files=False):
-    """Simple function that lists the latest items from <dir>"""
-    output = []
+def _ls_files(dir):
     with SeedBox() as s:
         try:
             s.chdir(os.path.join('downloads', dir))
@@ -21,17 +19,24 @@ def _latest_files(dir, count=10, all_files=False):
         except:
             click.secho("Invalid directory.", fg="red")
             return
+        return files
 
-    for file in files:
+
+def _latest_files(dir, count=10, all_files=False):
+    """Simple function that lists the latest items from <dir>"""
+    output = []
+    files = _ls_files(dir)
+    for index, file in enumerate(files):
         filename = file.filename.encode('ascii', errors='replace')
         msg = "{}  {}".format(
             convert_time(file.st_mtime),
             click.format_filename(filename)
         )
+        _id = click.style(str(index), fg="yellow")
         if is_dir(file):
-            output.append(click.style(msg, fg='blue'))
+            output.append("{} {}".format(_id, click.style(msg, fg='blue')))
         else:
-            output.append(click.style(msg, fg='white'))
+            output.append("{} {}".format(_id, click.style(msg, fg='white')))
 
         if not all_files:
             output = output[:count]
@@ -44,6 +49,24 @@ def _latest_files(dir, count=10, all_files=False):
     output = '\n'.join(output)
     echo_func(output)
     return
+
+
+def _download(remote_dir, local_dir, is_directory=False):
+    with SeedBox() as sftp:
+        if is_directory:
+            sftp.get(rpath, lpath)
+        else:
+            os.path.exists(local_dir) or os.makedirs(local_dir)
+            dir_items = sftp.listdir_attr(remote_dir)
+            for item in dir_items:
+                remote_path = os.path.join(remote_dir, item.filename)
+                local_path = os.path.join(local_dir, item.filename)
+                if is_dir(item):
+                    download_dir(remote_path, local_path)
+                else:
+                    sftp.get(remote_path, local_path)
+
+        return
 
 
 @click.group()
@@ -76,12 +99,17 @@ def ls(dir, count, all_files):
     _latest_files(dir, count, all_files)
 
 
-@cli.command()
-@click.option('--rpath', '-r', default='', help='file on sb to download')
-@click.option('--lpath', '-l', default='', help='local dir to download file to')
-def download_file(rpath, lpath):
-    s = SeedBox()
-    q.enqueue(s.download_file, lpath, rpath)
+@click.argument('file_id')
+def get(file_id):
+    folder, idx = file_id.split('_')
+    files = _ls_files(folder)
+    wanted = files[int(idx)]
+    is_directory = is_dir(wanted)
+    msg = "Do you want to download {}?".format(wanted.filename)
+    if click.confirm(msg, abort=True):
+        rpath = os.path.join('downloads', folder, wanted.filename)
+        lpath = os.path.join('/Users/anthonyfox/Desktop', wanted.filename)
+        q.enqueue(_download, rpath, lpath, is_directory)
 
 
 if __name__ == '__main__':
