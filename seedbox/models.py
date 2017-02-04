@@ -73,3 +73,12 @@ class SeedBox():
 
     def __exit__(self, *args):
         self._logout()
+
+    def download_file(self, lpath, rpath):
+        # self._login()
+        import time
+        for n in range(10):
+            print(n)
+            time.sleep(1)
+        # self._logout()
+        return

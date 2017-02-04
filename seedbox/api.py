@@ -1,11 +1,14 @@
 import os
 
 import click
+from rq import Queue
 
 from .models import SeedBox
 from .utils import convert_time, is_dir
+from .worker import conn
 
 PAGER_LIMIT = 12
+q = Queue(connection=conn)
 
 
 def _ls_files(dir):
@@ -96,7 +99,6 @@ def ls(dir, count, all_files):
     _latest_files(dir, count, all_files)
 
 
-@cli.command()
 @click.argument('file_id')
 def get(file_id):
     folder, idx = file_id.split('_')
@@ -107,7 +109,7 @@ def get(file_id):
     if click.confirm(msg, abort=True):
         rpath = os.path.join('downloads', folder, wanted.filename)
         lpath = os.path.join('/Users/anthonyfox/Desktop', wanted.filename)
-        _download(rpath, lpath, is_directory)
+        q.enqueue(_download, rpath, lpath, is_directory)
 
 
 if __name__ == '__main__':
