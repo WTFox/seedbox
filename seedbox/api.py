@@ -19,16 +19,17 @@ def _latest_files(dir, count=10, all_files=False):
             click.secho("Invalid directory.", fg="red")
             return
 
-    for file in files:
+    for index, file in enumerate(files):
         filename = file.filename.encode('ascii', errors='replace')
         msg = "{}  {}".format(
             convert_time(file.st_mtime),
             click.format_filename(filename)
         )
+        _id = click.style(str(index), fg="yellow")
         if is_dir(file):
-            output.append(click.style(msg, fg='blue'))
+            output.append("{} {}".format(_id, click.style(msg, fg='blue')))
         else:
-            output.append(click.style(msg, fg='white'))
+            output.append("{} {}".format(_id, click.style(msg, fg='white')))
 
         if not all_files:
             output = output[:count]
