@@ -1,11 +1,14 @@
 import os
 
 import click
+from rq import Queue
 
 from .models import SeedBox
 from .utils import convert_time, is_dir
+from .worker import conn
 
 PAGER_LIMIT = 12
+q = Queue(connection=conn)
 
 
 def _latest_files(dir, count=10, all_files=False):
@@ -71,6 +74,14 @@ def tv(count, all_files):
 def ls(dir, count, all_files):
     """lists the latest files from /downloads/<dir>."""
     _latest_files(dir, count, all_files)
+
+
+@cli.command()
+@click.option('--rpath', '-r', default='', help='file on sb to download')
+@click.option('--lpath', '-l', default='', help='local dir to download file to')
+def download_file(rpath, lpath):
+    s = SeedBox()
+    q.enqueue(s.download_file, lpath, rpath)
 
 
 if __name__ == '__main__':
