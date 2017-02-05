@@ -53,7 +53,7 @@ def _latest_files(dir, count=10, all_files=False):
     return
 
 
-@job('high', connection=conn, timeout=5)
+@job('high', connection=conn)
 def _download(remote_dir, local_dir, is_directory=False):
     with SeedBox() as sftp:
         if not is_directory:
@@ -112,7 +112,7 @@ def get(file_id):
     msg = "Do you want to download {}?".format(wanted.filename)
     if click.confirm(msg, abort=True):
         rpath = os.path.join('downloads', folder, wanted.filename)
-        lpath = os.path.join('/Users/anthonyfox/Desktop', wanted.filename)
+        lpath = os.path.join('/home/wtfox/edrive/_black_hole/movies', click.format_filename(wanted.filename))
         _download.delay(rpath, lpath, is_directory)
 
 
