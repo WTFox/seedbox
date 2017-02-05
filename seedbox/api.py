@@ -1,14 +1,16 @@
 import os
 
 import click
+from redis import Redis
 from rq import Queue
+from rq.decorators import job
 
 from .models import SeedBox
 from .utils import convert_time, is_dir
-from .worker import conn
 
 PAGER_LIMIT = 12
-q = Queue(connection=conn)
+
+conn = Redis('10.10.0.9', 6379)
 
 
 def _ls_files(dir):
@@ -51,6 +53,7 @@ def _latest_files(dir, count=10, all_files=False):
     return
 
 
+@job('high', connection=conn, timeout=5)
 def _download(remote_dir, local_dir, is_directory=False):
     with SeedBox() as sftp:
         if not is_directory:
@@ -110,7 +113,7 @@ def get(file_id):
     if click.confirm(msg, abort=True):
         rpath = os.path.join('downloads', folder, wanted.filename)
         lpath = os.path.join('/Users/anthonyfox/Desktop', wanted.filename)
-        q.enqueue(_download, rpath, lpath, is_directory)
+        _download.delay(rpath, lpath, is_directory)
 
 
 if __name__ == '__main__':
